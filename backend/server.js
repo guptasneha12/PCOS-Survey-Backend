@@ -10,23 +10,18 @@ app.use(cors());
 
 // Root route
 app.get("/", (req, res) => {
-    return res.json({ message: "Server is running!" });
+    res.json({ message: "Server is running!" });
 });
 
 // Submit response route
 app.post("/api/submit-response", async (req, res) => {
-    console.log(req.body);
-
-    const { name, email, responses } = req.body;
-
-    if (!name || !email || !Array.isArray(responses) || !responses.every(row => Array.isArray(row))) {
-        return res.status(400).json({
-            success: false,
-            message: "Invalid request format. 'responses' must be a 2D array.",
-        });
-    }
-
     try {
+        const { name, email, responses } = req.body;
+
+        if (!name || !email || !Array.isArray(responses) || !responses.every(row => Array.isArray(row))) {
+            return res.status(400).json({ success: false, message: "Invalid request format. 'responses' must be a 2D array." });
+        }
+
         const newUser = await UserResponse.create({ name, email, responses });
         res.json({ success: true, message: "Data successfully saved", data: newUser });
     } catch (err) {
@@ -35,37 +30,20 @@ app.post("/api/submit-response", async (req, res) => {
     }
 });
 
-// Get response by email route
+// Get response by email
 app.get("/api/get-response/:email", async (req, res) => {
-    const email = req.params.email;
-
     try {
-        const user = await UserResponse.findOne({ where: { email } });
+        const user = await UserResponse.findOne({ where: { email: req.params.email } });
 
         if (!user) {
-            return res.status(404).json({
-                success: false,
-                message: "User not found",
-            });
+            return res.status(404).json({ success: false, message: "User not found" });
         }
 
-        res.json({
-            success: true,
-            data: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                responses: user.responses, // Already parsed as a 2D array
-            },
-        });
+        res.json({ success: true, data: user });
     } catch (err) {
         console.error("SQL Error:", err.message);
         res.status(500).json({ success: false, message: "Database error" });
     }
 });
 
-// Start server
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-});
+module.exports = app; // ✅ Export app for serverless function
