@@ -24,6 +24,12 @@ db.connect(err => {
     }
 });
 
+app.get("/",(req,res)=>{
+    return res.json({
+        message:"Good to go",
+    })
+})
+
 // Submit response route
 app.post("/api/submit-response", (req, res) => {
     console.log(req.body);
