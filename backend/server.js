@@ -2,9 +2,11 @@ const express = require("express");
 require("dotenv").config();
 const mysql = require("mysql2");
 const bodyParser = require("body-parser");
+const cors = require("cors");
 
 const app = express();
 app.use(bodyParser.json());
+
 
 // Database connection
 const db = mysql.createConnection({
@@ -113,3 +115,6 @@ app.get("/api/get-response/:email", (req, res) => {
 
 // Export Express app as a serverless function
 module.exports = app;
+app.listen(5000,()=>{
+    console.log("server is running");
+})
